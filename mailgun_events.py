@@ -4,13 +4,15 @@ import json
 import requests
 import sys
 from os import path
+import pandas as pd
 
 if len(sys.argv) != 4:
     print("Usage: mailgun_events.py 'api-key' 'example.com' 'rejected OR failed'")
     sys.exit(1)
 
 filename = "result.json"
-page_url = 'page_url.txt'
+filename_csv = "result.csv"
+page_url = "page_url.txt"
 
 api_key = sys.argv[1]
 domain = sys.argv[2]
@@ -43,7 +45,7 @@ while url is not last_next_url:
         if path.exists(filename) and path.getsize(filename) > 0:
             with open(filename, "r+") as outfile:
                     data = json.load(outfile)
-                    data.append(item)
+                    data.extend(item)
                     outfile.seek(0)
                     json.dump(data, outfile)
                     print('Update results')
@@ -52,6 +54,7 @@ while url is not last_next_url:
                 json.dump(item, outfile)
                 print('Init results')
     else:
+        print('Last page found')
         break
 
     if 200 == r.status_code:
@@ -64,4 +67,11 @@ while url is not last_next_url:
     print(url)
     count += 1
 
+with open(filename, 'r') as f:
+    data = json.loads(f.read())
 
+df = pd.json_normalize(data)
+df.to_csv(filename_csv, index=False)
+
+print('*'*20 + 'Success' + '*'*20)
+sys.exit(1)
