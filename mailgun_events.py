@@ -5,7 +5,7 @@ import requests
 import json
 
 if len(sys.argv) != 1:
-    print("Usage: mailgun_events.py 'api-key' 'example.com'")
+    print("Usage: mailgun_events.py 'api-key' 'example.com' 'rejected OR failed'")
     sys.exit(1)
 
 filename = "result.json"
