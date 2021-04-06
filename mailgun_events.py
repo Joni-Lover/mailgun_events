@@ -4,7 +4,7 @@ import sys
 import requests
 import json
 
-if len(sys.argv) != 1:
+if len(sys.argv) != 3:
     print("Usage: mailgun_events.py 'api-key' 'example.com' 'rejected OR failed'")
     sys.exit(1)
 
