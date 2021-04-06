@@ -26,8 +26,10 @@ count = 0
 
 if path.exists(page_url) and path.getsize(page_url) > 0:
     f = open(page_url, "r")
-    url = f.readline()
-    print(url)
+    url = f.readline().rstrip()
+    count = int(f.readlines()[0:1][0])
+
+print("Continue from %s page, url: %s" % (count, url))
 
 while url is not last_next_url:
     r = requests.get(
@@ -35,10 +37,7 @@ while url is not last_next_url:
         auth=("api", api_key),
         params=params
     )
-
-    item += r.json()["items"]
-    print(count)
-    print(url)
+    item = r.json()["items"]
 
     if item != 0:
         if path.exists(filename) and path.getsize(filename) > 0:
@@ -52,12 +51,17 @@ while url is not last_next_url:
             with open(filename, "w") as outfile:
                 json.dump(item, outfile)
                 print('Init results')
+    else:
+        break
 
-
-    if 200 == r.status_code and not len(r.json()["items"]) == 0:
+    if 200 == r.status_code:
         url = r.json()["paging"]['next']
-        f = open(page_url, "w")
-        f.write(url)
+        f = open(page_url, "w+")
+        f.write(url + "\n" + str(count))
         f.close()
-    count += count + 1
+
+    print(count)
+    print(url)
+    count += 1
+
 
