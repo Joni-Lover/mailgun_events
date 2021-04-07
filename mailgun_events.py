@@ -41,19 +41,20 @@ while url is not last_next_url:
     )
     item = r.json()["items"]
 
-    if item != 0:
+    if item is not None and len(item) > 0:
         if path.exists(filename) and path.getsize(filename) > 0:
             with open(filename, "r+") as outfile:
-                    data = json.load(outfile)
-                    data.extend(item)
-                    outfile.seek(0)
-                    json.dump(data, outfile)
-                    print('Update results')
+                data = json.load(outfile)
+                data.extend(item)
+                outfile.seek(0)
+                json.dump(data, outfile)
+                print('Update results')
         else:
             with open(filename, "w") as outfile:
                 json.dump(item, outfile)
                 print('Init results')
     else:
+        last_next_url = url
         print('Last page found')
         break
 
@@ -67,11 +68,13 @@ while url is not last_next_url:
     print(url)
     count += 1
 
-with open(filename, 'r') as f:
-    data = json.loads(f.read())
+if last_next_url and path.exists(page_url) and path.getsize(page_url) > 0:
+    with open(filename, 'r') as f:
+        data = json.loads(f.read())
 
-df = pd.json_normalize(data)
-df.to_csv(filename_csv, index=False)
+    df = pd.json_normalize(data)
+    df.to_csv(filename_csv, index=False)
+    print("Prepared CSV file %s is ready" % filename_csv)
 
-print('*'*20 + 'Success' + '*'*20)
+print('*' * 20 + 'Success' + '*' * 20)
 sys.exit(1)
